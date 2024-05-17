@@ -61,11 +61,20 @@ async def create_employee(employee: Employee, db: db_dependency):
 # GET ALL EMPLOYEES
 @app.get("/employees/")
 async def get_employees(skip: int, limit: int, db: db_dependency):
-    employees = db.query(models.Employee).offset(skip).limit(limit).all()
-    return employees
+    db_employees = db.query(models.Employee).offset(skip).limit(limit).all()
+    return db_employees
 
-# GET ALL EMPLOYEES
+# GET EMPLOYEE BY ID
 @app.get("/employees/{id}")
-async def get_employees(id: str, db: db_dependency):
-    employee = db.query(models.Employee).filter_by(id = id).first()
-    return employee
+async def get_employee(id: str, db: db_dependency):
+    db_employee = db.query(models.Employee).filter_by(id = id).first()
+    return db_employee
+
+# GET EMPLOYEE BY ID
+@app.delete("/employees/{id}")
+async def remove_employee(id: str, db: db_dependency):
+    db_employee = db.query(models.Employee).filter_by(id = id).first()
+    print(db_employee)
+    db.delete(db_employee)
+    db.commit()
+    return db_employee
