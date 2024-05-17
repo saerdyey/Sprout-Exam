@@ -1,6 +1,7 @@
 from typing import Union, List, Annotated
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
 from enum import Enum
 import models
@@ -70,11 +71,30 @@ async def get_employee(id: str, db: db_dependency):
     db_employee = db.query(models.Employee).filter_by(id = id).first()
     return db_employee
 
-# GET EMPLOYEE BY ID
+# DELETE EMPLOYEE BY ID
 @app.delete("/employees/{id}")
 async def remove_employee(id: str, db: db_dependency):
     db_employee = db.query(models.Employee).filter_by(id = id).first()
-    print(db_employee)
     db.delete(db_employee)
     db.commit()
     return db_employee
+
+# UPDATE EMPLOYEE BY ID
+@app.put("/employees/{id}")
+async def update_employee(id: str, update_data: dict, db: db_dependency):
+    db_employee = db.query(models.Employee).filter_by(id = id).first()
+
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    for field, value in update_data.items():
+        if hasattr(db_employee, field):
+            setattr(db_employee, field, value)
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
+
+    # db.up(db_employee)
+    # db.commit()
+    db.commit()
+
+    return JSONResponse(status_code=200, content={"message": "Employee updated successfully"})
