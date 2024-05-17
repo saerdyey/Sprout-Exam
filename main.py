@@ -58,3 +58,9 @@ async def create_employee(employee: Employee, db: db_dependency):
     db.commit()
     db.refresh(db_employee)
     return db_employee
+
+# GET ALL EMPLOYEES
+@app.get("/employees/")
+async def get_employees(skip: int, limit: int, db: db_dependency):
+    employees = db.query(models.Employee).offset(skip).limit(limit).all()
+    return employees
