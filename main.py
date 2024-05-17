@@ -63,3 +63,9 @@ async def create_employee(employee: Employee, db: db_dependency):
 async def get_employees(skip: int, limit: int, db: db_dependency):
     employees = db.query(models.Employee).offset(skip).limit(limit).all()
     return employees
+
+# GET ALL EMPLOYEES
+@app.get("/employees/{id}")
+async def get_employees(id: str, db: db_dependency):
+    employee = db.query(models.Employee).filter_by(id = id).first()
+    return employee
