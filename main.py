@@ -6,7 +6,6 @@ from enum import Enum
 import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine) # MIGRATION
@@ -25,10 +24,10 @@ class Employee(BaseModel):
     last_name: str
     email: EmailStr
     status: Status
-    number_of_leaves: int
-    benefits: List[Benefits]
-    contract_end_date: str
-    project: str
+    number_of_leaves: int = 0
+    benefits: List[Benefits] = None
+    contract_end_date: str = None
+    project: str = None
 
 def get_db():
     db = SessionLocal()
