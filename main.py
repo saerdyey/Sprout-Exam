@@ -3,8 +3,12 @@ from typing import Union, List
 from fastapi import FastAPI
 from pydantic import BaseModel, EmailStr
 from enum import Enum
+import models
+from database import engine, SessionLocal
+from sqlalchemy.orm import Session
 
 app = FastAPI()
+models.Base.metadata.create_all(bind=engine) # MIGRATION
 
 class Status(str, Enum):
     regular = 'REGULAR'
@@ -33,3 +37,10 @@ def read_root():
 @app.post("/employee/")
 async def create_employee(employee: Employee):
     return employee
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield
+    finally:
+        db.close()
