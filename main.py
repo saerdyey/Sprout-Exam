@@ -63,21 +63,31 @@ async def create_employee(employee: Employee, db: db_dependency):
 @app.get("/employees/")
 async def get_employees(skip: int, limit: int, db: db_dependency):
     db_employees = db.query(models.Employee).offset(skip).limit(limit).all()
+
     return db_employees
 
 # GET EMPLOYEE BY ID
 @app.get("/employees/{id}")
 async def get_employee(id: str, db: db_dependency):
     db_employee = db.query(models.Employee).filter_by(id = id).first()
+
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
     return db_employee
 
 # DELETE EMPLOYEE BY ID
 @app.delete("/employees/{id}")
 async def remove_employee(id: str, db: db_dependency):
     db_employee = db.query(models.Employee).filter_by(id = id).first()
+
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
     db.delete(db_employee)
     db.commit()
-    return db_employee
+
+    return JSONResponse(status_code=200, content={"message": "Employee deleted successfully"})
 
 # UPDATE EMPLOYEE BY ID
 @app.put("/employees/{id}")
@@ -93,8 +103,7 @@ async def update_employee(id: str, update_data: dict, db: db_dependency):
         else:
             raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
 
-    # db.up(db_employee)
-    # db.commit()
     db.commit()
+    db.refresh(db_employee)
 
-    return JSONResponse(status_code=200, content={"message": "Employee updated successfully"})
+    return db_employee
