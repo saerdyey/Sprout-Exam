@@ -21,4 +21,3 @@ class Employee(Base):
     benefits = Column(ARRAY(String), nullable=True)
     contract_end_date = Column(Date, nullable=True)
     project = Column(String, nullable=True)
-    test = Column(String, nullable=True)
