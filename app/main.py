@@ -1,12 +1,12 @@
-from fastapi import Depends, FastAPI
-from .dependencies import get_query_token, get_token_header
-from .routers import employees
+from fastapi import FastAPI
 
-# app = FastAPI(dependencies=[Depends(get_query_token)])
+from .routers import employees, token
+
+
 app = FastAPI()
-# Base.metadata.create_all(bind=engine) # MIGRATION
 
 app.include_router(employees.router)
+app.include_router(token.router)
 
 @app.get("/")
 async def root():

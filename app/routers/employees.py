@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 from app.database import get_db
 from typing import Annotated
 from sqlalchemy.orm import Session
@@ -10,14 +13,18 @@ from app.dto.employee import CreateEmployeeDto
 
 employee.Base.metadata.create_all(bind=engine)
 
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+ALGORITHM = "HS256"
 
 router = APIRouter()
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 db_dependency = Annotated[Session, Depends(get_db)]
 
-
+# CREATE EMPLOYEE
 @router.post("/employees/", tags=["employees"])
-async def create_employee(employee: CreateEmployeeDto, db: db_dependency):
+async def create_employee(employee: CreateEmployeeDto, db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
     db_employee=Employee(
         first_name=employee.first_name,
         last_name=employee.last_name,
@@ -37,17 +44,70 @@ async def create_employee(employee: CreateEmployeeDto, db: db_dependency):
 
     return employee
 
+# GET ALL EMPLOYEES
 @router.get("/employees/", tags=["employees"])
-async def get_employees(skip: int, limit: int, db: db_dependency):
-    db_employees = db.query(Employee).offset(skip).limit(limit).all()
-    return db_employees
+async def get_employees(skip: int, limit: int, db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+     
+    try: #?? EXTRA CREDENTIAL VALIDATION, CAN BE IMPLEMENTED AS DECORATOR
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        
+        db_employees = db.query(Employee).offset(skip).limit(limit).all()
+
+        return db_employees
+    except JWTError:
+        raise credentials_exception
 
 
-@router.get("/employees/me", tags=["employees"])
-async def read_user_me():
-    return {"username": "fakecurrentuser"}
+# GET EMPLOYEE BY ID
+@router.get("/employees/{id}", tags=["employees"])
+async def get_employee(id: str, db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
+    db_employee = db.query(Employee).filter_by(id = id).first()
+
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    return db_employee
 
 
-@router.get("/employees/{username}", tags=["employees"])
-async def read_user(username: str):
-    return {"username": username}
+# DELETE EMPLOYEE BY ID
+@router.delete("/employees/{id}", tags=["employees"])
+async def remove_employee(id: str, db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
+    db_employee = db.query(Employee).filter_by(id = id).first()
+
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    db.delete(db_employee)
+    db.commit()
+
+    return JSONResponse(status_code=200, content={"message": "Employee deleted successfully"})
+
+# UPDATE EMPLOYEE BY ID
+@router.put("/employees/{id}", tags=["employees"])
+async def update_employee(id: str, update_data: dict, db: db_dependency):
+    db_employee = db.query(Employee).filter_by(id = id).first()
+
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    # TODO: Add check if status update from regular to contractual then set leaves=0, benefits=null
+    # TODO: Add check if status update from contractual to regular then set contract_end_date=null, project=null
+
+    for field, value in update_data.items():
+        if hasattr(db_employee, field):
+            setattr(db_employee, field, value)
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
+
+    db.commit()
+    db.refresh(db_employee)
+
+    return db_employee
