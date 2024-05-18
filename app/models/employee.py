@@ -1,12 +1,11 @@
 from sqlalchemy import Column, Integer, String, Date, Enum
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 import enum
 import uuid
 
-from database import Base
+from app.database import Base
 
-class Status(enum.Enum):
+class StatusEnum(enum.Enum):
     regular = 'regular'
     contractual = 'contractual'
 
@@ -17,7 +16,7 @@ class Employee(Base):
     first_name = Column(String)
     last_name = Column(String)
     email = Column(String, unique=True, index=True)
-    status = Column(Enum(Status))
+    status = Column(Enum(StatusEnum))
     number_of_leaves = Column(Integer, nullable=True)
     benefits = Column(ARRAY(String), nullable=True)
     contract_end_date = Column(Date, nullable=True)
