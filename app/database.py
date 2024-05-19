@@ -1,9 +1,17 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from app.config.settings import Settings
 
-PGDB_URL = 'postgresql://postgres:password123@localhost:5432/sprout'
-# PGDB_URL = 'postgresql://postgres:password123@localhost:5432/sprout'
+settings = Settings()
+
+pgdb_username = settings.pgdb_username
+pgdb_password = settings.pgdb_password
+pgdb_host = settings.pgdb_host
+pgdb_port = settings.pgdb_port
+pgdb_name = settings.pgdb_name
+
+PGDB_URL = f'postgresql://{pgdb_username}:{pgdb_password}@{pgdb_host}:{pgdb_port}/{pgdb_name}'
 
 engine = create_engine(PGDB_URL)
 metadata = MetaData()
