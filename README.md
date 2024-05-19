@@ -23,7 +23,17 @@ $ docker compose up -d
 
 ## Running the app without using docker
 > [!NOTE]
-> (Recommended) You might also want to create venv (virtual environment) before running the installation of requirements.
+> (Recommended) You might also want to create and activate venv (virtual environment) before running the installation of requirements.
+
+## Creating and activating venv
+```bash
+# creating venv
+$ python -m venv venv
+
+# activating venv
+$ source venv/bin/activate
+```
+
 
 ## Installation of requirements
 ```bash
