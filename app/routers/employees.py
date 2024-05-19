@@ -38,7 +38,7 @@ async def create_employee(employee: CreateEmployeeDto, db: db_dependency, userna
 
 # GET ALL EMPLOYEES
 @router.get("/employees/", tags=["employees"])
-async def get_employees(skip: int, limit: int, db: db_dependency, username: Annotated[str, Depends(verify_token)]):
+async def get_employees(skip: int=0, limit: int=100, db: db_dependency=None, username: Annotated[str, Depends(verify_token)]=None):
     db_employees = db.query(Employee).offset(skip).limit(limit).all()
 
     return db_employees
