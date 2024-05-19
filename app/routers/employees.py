@@ -1,32 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
 from app.database import get_db
 from typing import Annotated
 from sqlalchemy.orm import Session
-
 from app.models import employee
 from app.models.employee import Employee
 from app.database import engine
 from app.dto.employee import CreateEmployeeDto
-from app.config.settings import Settings
-
-settings = Settings()
+from app.dependencies import verify_token
 
 employee.Base.metadata.create_all(bind=engine)
 
-ALGORITHM = "HS256"
-
 router = APIRouter()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
+
 # CREATE EMPLOYEE
 @router.post("/employees/", tags=["employees"])
-async def create_employee(employee: CreateEmployeeDto, db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
+async def create_employee(employee: CreateEmployeeDto, db: db_dependency, username: Annotated[str, Depends(verify_token)]):
     db_employee=Employee(
         first_name=employee.first_name,
         last_name=employee.last_name,
@@ -46,29 +38,14 @@ async def create_employee(employee: CreateEmployeeDto, db: db_dependency, token:
 
 # GET ALL EMPLOYEES
 @router.get("/employees/", tags=["employees"])
-async def get_employees(skip: int, limit: int, db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+async def get_employees(skip: int, limit: int, db: db_dependency, username: Annotated[str, Depends(verify_token)]):
+    db_employees = db.query(Employee).offset(skip).limit(limit).all()
 
-    try: #?? EXTRA CREDENTIAL VALIDATION, CAN BE IMPLEMENTED AS DECORATOR TO ALL FUNCTION
-        payload = jwt.decode(token, settings.secret_key, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        
-        db_employees = db.query(Employee).offset(skip).limit(limit).all()
-
-        return db_employees
-    except JWTError:
-        raise credentials_exception
-
+    return db_employees
 
 # GET EMPLOYEE BY ID
 @router.get("/employees/{id}", tags=["employees"])
-async def get_employee(id: str, db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_employee(id: str, db: db_dependency, username: Annotated[str, Depends(verify_token)]):
     db_employee = db.query(Employee).filter_by(id = id).first()
 
     if not db_employee:
@@ -79,7 +56,7 @@ async def get_employee(id: str, db: db_dependency, token: Annotated[str, Depends
 
 # DELETE EMPLOYEE BY ID
 @router.delete("/employees/{id}", tags=["employees"])
-async def remove_employee(id: str, db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
+async def remove_employee(id: str, db: db_dependency, username: Annotated[str, Depends(verify_token)]):
     db_employee = db.query(Employee).filter_by(id = id).first()
 
     if not db_employee:
@@ -92,7 +69,7 @@ async def remove_employee(id: str, db: db_dependency, token: Annotated[str, Depe
 
 # UPDATE EMPLOYEE BY ID
 @router.put("/employees/{id}", tags=["employees"])
-async def update_employee(id: str, update_data: dict, db: db_dependency):
+async def update_employee(id: str, update_data: dict, db: db_dependency, username: Annotated[str, Depends(verify_token)]):
     db_employee = db.query(Employee).filter_by(id = id).first()
 
     if not db_employee:
