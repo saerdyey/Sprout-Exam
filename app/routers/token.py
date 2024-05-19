@@ -4,14 +4,16 @@ from fastapi import APIRouter, Form, HTTPException, status
 from pydantic import BaseModel
 from datetime import datetime, timedelta, timezone
 from jose import jwt
+from app.config.settings import Settings
 
-static_admin_credentials = {
-        "username": "admin",
-        "password": "password",
-}
+settings = Settings()
+
+# static_admin_credentials = {
+#         "username": "admin",
+#         "password": "password",
+# }
 
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -27,7 +29,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=ALGORITHM)
     return encoded_jwt
 
 router = APIRouter()
@@ -37,10 +39,7 @@ async def login_for_access_token(
     username: Annotated[str, Form()], password: Annotated[str, Form()]
 ) -> Token:
     
-    print(username, password)
-    print(static_admin_credentials)
-
-    if username != static_admin_credentials['username'] or password != static_admin_credentials['password']:
+    if username != settings.admin_username or password != settings.admin_password:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",

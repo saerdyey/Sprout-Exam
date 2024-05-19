@@ -10,10 +10,12 @@ from app.models import employee
 from app.models.employee import Employee
 from app.database import engine
 from app.dto.employee import CreateEmployeeDto
+from app.config.settings import Settings
+
+settings = Settings()
 
 employee.Base.metadata.create_all(bind=engine)
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 
 router = APIRouter()
@@ -36,8 +38,6 @@ async def create_employee(employee: CreateEmployeeDto, db: db_dependency, token:
         project=employee.project
     )
 
-    print(db_employee)
-
     db.add(db_employee)
     db.commit()
     db.refresh(db_employee)
@@ -52,9 +52,9 @@ async def get_employees(skip: int, limit: int, db: db_dependency, token: Annotat
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-     
-    try: #?? EXTRA CREDENTIAL VALIDATION, CAN BE IMPLEMENTED AS DECORATOR
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+    try: #?? EXTRA CREDENTIAL VALIDATION, CAN BE IMPLEMENTED AS DECORATOR TO ALL FUNCTION
+        payload = jwt.decode(token, settings.secret_key, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
