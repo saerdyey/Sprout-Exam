@@ -98,10 +98,16 @@ async def update_employee(id: str, update_data: dict, db: db_dependency):
     if not db_employee:
         raise HTTPException(status_code=404, detail="Employee not found")
 
-    # TODO: Add check if status update from regular to contractual then set leaves=0, benefits=null
-    # TODO: Add check if status update from contractual to regular then set contract_end_date=null, project=null
-
     for field, value in update_data.items():
+
+        if (field == 'status' and value == 'regular'):
+            setattr(db_employee, 'contract_end_date', None)
+            setattr(db_employee, 'project', None)
+
+        elif (field == 'status' and value == 'contractual'):
+            setattr(db_employee, 'benefits', None)
+            setattr(db_employee, 'number_of_leaves', 0)
+
         if hasattr(db_employee, field):
             setattr(db_employee, field, value)
         else:
