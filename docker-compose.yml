@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      PGDB_HOST: db
+      PGDB_PORT: 5432
+      PGDB_USER: postgres
+      PGDB_PASSWORD: password123
+      PGDB_NAME: sprout_exam
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: sprout_exam
