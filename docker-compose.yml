@@ -5,12 +5,10 @@ services:
     build: .
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       PGDB_HOST: db
-      PGDB_PORT: 5432
-      PGDB_USER: postgres
-      PGDB_PASSWORD: password123
-      PGDB_NAME: sprout_exam
     depends_on:
       - db
 
