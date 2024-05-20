@@ -10,4 +10,4 @@ app.include_router(token.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello Bigger Applications!"}
+    return {"message": "Sprout Exam by Jay Anton Roblico 🤟"}

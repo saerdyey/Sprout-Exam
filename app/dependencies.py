@@ -8,7 +8,7 @@ settings = Settings()
 
 ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 async def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
