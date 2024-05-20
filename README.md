@@ -27,6 +27,7 @@ $ docker compose up -d
 > (Recommended) You might also want to create and activate venv (virtual environment) before running the installation of requirements.
 
 ## Creating and activating venv
+for linux
 ```bash
 # creating venv
 $ python -m venv venv
@@ -35,11 +36,21 @@ $ python -m venv venv
 $ source venv/bin/activate
 ```
 
+for windows
+```bash
+# creating venv
+$ python -m venv venv
+
+# activating venv
+$ venv\Scripts\activate
+```
+
 
 ## Installation of requirements
 ```bash
 $ pip install -r requirements.txt
 ```
+you might encounter having issue installing the requirements in windows because of uvloop lib doesn't support windows yet, you can comment that out in the requirements.txt file.
 
 ## Running the app
 ```bash
