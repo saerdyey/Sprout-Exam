@@ -8,11 +8,6 @@ from app.config.settings import Settings
 
 settings = Settings()
 
-# static_admin_credentials = {
-#         "username": "admin",
-#         "password": "password",
-# }
-
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

@@ -18,7 +18,7 @@ async def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    try: #?? EXTRA CREDENTIAL VALIDATION, CAN BE IMPLEMENTED AS DECORATOR TO ALL FUNCTION
+    try:
         payload = jwt.decode(token, settings.secret_key, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
