@@ -4,7 +4,8 @@ Basic Restful API for employee management (CRUD) system. Created using the FastA
 ## Running the API
 You can run the API using docker to automatically create the dependency database server without installing and configuring the actual database.
 Alternatively, you can also run the API without docker, you just need to have PostgreSQL installed and a database named sprout_exam.
-Then you have to create a .env that matches the credentials you set on that database. Check .env.example file for your reference.
+
+You also have to create a .env file containing variables that matches the credentials you set on that database. Check .env.example file for your reference. You don't have to change the PGDB credentials if you're running it with docker compose.
 
 ---
 
