@@ -7,10 +7,21 @@ from alembic import context
 
 from app.database import Base
 from app.models import employee
+from app.config.settings import Settings
+
+settings = Settings()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+pgdb_username = settings.pgdb_username
+pgdb_password = settings.pgdb_password
+pgdb_host = settings.pgdb_host
+pgdb_port = settings.pgdb_port
+pgdb_name = settings.pgdb_name
+
+config.set_main_option('sqlalchemy.url', f'postgresql://{pgdb_username}:{pgdb_password}@{pgdb_host}:{pgdb_port}/{pgdb_name}')
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
