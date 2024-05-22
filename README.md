@@ -66,6 +66,8 @@ going to deploy this on production, I'd like to prioritize security. I already i
 
 For scalability, this is just a simple crud but if we need to add more models and services we could optimize database queries and explore caching. Currently we need to use localhost PostgreSQL database if we're running the API without using the docker, but we can also use cloud databases. For dockerized version, I didn't implement a volume setup, so we need to setup it for the data to persist even if the container is removed. We could also add API monitoring feature with comprehensive logging. Though Fast API already provides auto error handling, we can add more try except for expected possible errors to have more comprehensive logs.
 
+Additionally, we should write unit tests to ensure individual parts of our code function as expected. This will catch bugs early in the development process and make refactoring and future development safer.
+
 Lastly, we can also implement CICD pipelines, to automate the deployment of the API and minimize human error while maintaining a consistent process.
 
 These are the key enhancements I think will solidify the system's security, performance, and maintainability for a smooth production deployment.
